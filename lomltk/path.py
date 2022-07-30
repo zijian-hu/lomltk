@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from pathlib import Path
-from typing import Callable, List, Tuple
+from typing import Callable
 
 from joblib import delayed, Parallel
 
@@ -36,11 +36,11 @@ def find_all_files_helper(
         pattern: str = "*",
         is_recursive: bool = True,
         num_workers: int = 1
-) -> Tuple[List[Path], List[bool]]:
+) -> tuple[list[Path], list[bool]]:
     input_dir = Path(input_dir)
     num_workers = resolve_num_workers(num_workers)
 
-    file_paths: List[Path] = [
+    file_paths: list[Path] = [
         p for p in get_progress_bar(
             input_dir.rglob(pattern) if is_recursive else input_dir.glob(pattern),
             desc=f"Finding files w/ pattern \"{pattern}\""
@@ -61,12 +61,12 @@ def find_all_files_helper(
 
 def find_all_files(
         input_dir: str | Path,
-        helper_func: Callable[..., Tuple[List[Path], List[bool]]] = find_all_files_helper,
+        helper_func: Callable[..., tuple[list[Path], list[bool]]] = find_all_files_helper,
         is_valid_func: Callable[[str | Path], bool] = is_file,
         pattern: str = "*",
         is_recursive: bool = True,
         num_workers: int = 1
-) -> List[Path]:
+) -> list[Path]:
     file_paths, is_valid_list = helper_func(
         input_dir=input_dir,
         is_valid_func=is_valid_func,

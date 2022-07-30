@@ -6,7 +6,6 @@ from typing import (
     Any,
     Callable,
     Iterable,
-    List,
     Optional,
     Sequence,
 )
@@ -25,7 +24,7 @@ __all__ = [
 ]
 
 
-def split_chunks(inputs: Sequence[Any], chunk_size: int) -> List[List[Any]]:
+def split_chunks(inputs: Sequence[Any], chunk_size: int) -> list[list[Any]]:
     assert chunk_size > 0
     return [list(inputs[i:i + chunk_size]) for i in range(0, len(inputs), chunk_size)]
 
@@ -60,7 +59,7 @@ def retry(
     return decorate
 
 
-def flatten(lists: Iterable[Iterable[Any]]) -> List[Any]:
+def flatten(lists: Iterable[Iterable[Any]]) -> list[Any]:
     return list(itertools.chain.from_iterable(lists))
 
 

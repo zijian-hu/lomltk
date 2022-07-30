@@ -1,10 +1,6 @@
+from __future__ import annotations
 import math
-from typing import (
-    Any,
-    Callable,
-    Optional,
-    Union,
-)
+from typing import Any, Callable, Optional
 
 __all__ = [
     "get_file_type_str",
@@ -15,7 +11,7 @@ __all__ = [
 ]
 
 
-def int_or_inf(input_str: str) -> Union[int, float]:
+def int_or_inf(input_str: str) -> int | float:
     result = float(input_str)
 
     if not math.isinf(result):

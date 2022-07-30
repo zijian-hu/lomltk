@@ -4,7 +4,6 @@ from typing import (
     Any,
     Optional,
     Sequence,
-    Tuple,
     Union,
 )
 
@@ -115,7 +114,7 @@ def thumbnail(image: ImageType, max_size: int | float, inplace: bool = False) ->
 def draw_text(
         image: ImageType,
         text: str,
-        coordinates: Tuple[int, int],
+        coordinates: tuple[int, int],
         font_path: Optional[str | Path] = None,
         font_size: int = 32,
         anchor: Optional[str] = None,
