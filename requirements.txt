@@ -6,7 +6,6 @@ tqdm
 pillow
 future
 joblib
-matplotlib
 requests
 torch>=1.0.0
 torchvision
