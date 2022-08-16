@@ -18,6 +18,8 @@ package-lock.json
 __pycache__/
 *.pyc
 *.egg-info
+/build
+/dist
 
 # Jupyter notebook
 .ipynb_checkpoints
