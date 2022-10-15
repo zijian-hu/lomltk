@@ -9,25 +9,25 @@ from .utils import get_progress_bar
 from .multiprocessing import resolve_num_workers, tqdm_joblib_context
 
 __all__ = [
-    "get_real_path",
-    "is_file",
-    "is_dir",
-    "find_all_files_helper",
     "find_all_files",
+    "find_all_files_helper",
+    "get_real_path",
+    "is_dir",
+    "is_file",
     "safe_delete",
 ]
 
 
-def get_real_path(file_path: str | Path) -> Path:
-    return Path(os.path.realpath(str(file_path)))
+def get_real_path(path: str | Path) -> Path:
+    return Path(os.path.realpath(str(path)))
 
 
-def is_file(file_path: str | Path) -> bool:
-    return get_real_path(file_path).is_file()
+def is_file(path: str | Path) -> bool:
+    return get_real_path(path).is_file()
 
 
-def is_dir(file_path: str | Path) -> bool:
-    return get_real_path(file_path).is_dir()
+def is_dir(path: str | Path) -> bool:
+    return get_real_path(path).is_dir()
 
 
 def find_all_files_helper(
@@ -36,7 +36,7 @@ def find_all_files_helper(
         pattern: str = "*",
         is_recursive: bool = True,
         num_workers: int = 1
-) -> tuple[list[Path], list[bool]]:
+) -> dict[Path, bool]:
     input_dir = Path(input_dir)
     num_workers = resolve_num_workers(num_workers)
 
@@ -56,18 +56,18 @@ def find_all_files_helper(
         )
 
     assert len(file_paths) == len(is_valid_list)
-    return file_paths, is_valid_list
+    return {k: v for k, v in zip(file_paths, is_valid_list)}
 
 
 def find_all_files(
         input_dir: str | Path,
-        helper_func: Callable[..., tuple[list[Path], list[bool]]] = find_all_files_helper,
+        helper_func: Callable[..., dict[Path, bool]] = find_all_files_helper,
         is_valid_func: Callable[[str | Path], bool] = is_file,
         pattern: str = "*",
         is_recursive: bool = True,
         num_workers: int = 1
 ) -> list[Path]:
-    file_paths, is_valid_list = helper_func(
+    file_path_validity_dict = helper_func(
         input_dir=input_dir,
         is_valid_func=is_valid_func,
         pattern=pattern,
@@ -75,7 +75,7 @@ def find_all_files(
         num_workers=num_workers
     )
 
-    return [file_path for file_path, is_valid in zip(file_paths, is_valid_list) if is_valid]
+    return [k for k, v in file_path_validity_dict.items() if v]
 
 
 def safe_delete(path: str | Path) -> None:
