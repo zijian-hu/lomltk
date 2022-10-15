@@ -12,10 +12,13 @@ from typing import (
 from .path import is_file
 
 __all__ = [
+    # classes
     "DataEncoder",
+
+    # functions
+    "is_json",
     "safe_load",
     "safe_loads",
-    "is_json",
 ]
 
 
@@ -45,12 +48,12 @@ def safe_loads(string: AnyStr, default: Optional[Any] = None, **kwargs: Any) -> 
     return outputs
 
 
-def is_json(file_path: str | Path, mode: str = "r", encoding: Optional[str] = "utf-8", **kwargs: Any) -> bool:
+def is_json(file_path: str | Path, encoding: Optional[str] = "utf-8", **kwargs: Any) -> bool:
     if not is_file(file_path):
         return False
 
     try:
-        with open(file_path, mode=mode, encoding=encoding, **kwargs) as f:
+        with open(file_path, mode="r", encoding=encoding, **kwargs) as f:
             json.load(f)
     except JSONDecodeError:
         return False
