@@ -26,14 +26,15 @@ def get_logger(
         encoding: Optional[str] = None,
         format_str: Optional[str] = None,
         date_format: Optional[str] = None,
-        format_style: Literal["%", "{", "$"] = "%"
+        format_style: Literal["%", "{", "$"] = "%",
+        is_create_parents: bool = False
 ) -> Logger:
     """Create or retrieve logger based on name and configurations
 
     Args:
-        name: logger name
-        level: log level
-        propagate: if propagate to parent loggers
+        name: logger name.
+        level: log level.
+        propagate: if propagate to parent loggers.
         stream: logging stream. If not None, will remove all existing handlers.
         file_path: logging file path. If not None, will remove all existing handlers.
         file_mode: logging file mode.
@@ -41,6 +42,8 @@ def get_logger(
         format_str: format string. If not None, will be registered to all handlers.
         date_format: date format string. If not None, will be registered to all handlers.
         format_style: formatter style.
+        is_create_parents: if True and file_path is not None, will create parent directories
+            of the file_path.
 
     Returns:
         logger
@@ -58,6 +61,9 @@ def get_logger(
         handlers.append(StreamHandler(stream))
 
     if file_path is not None:
+        if is_create_parents:
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
         handlers.append(FileHandler(filename=str(file_path), mode=file_mode, encoding=encoding))
 
     if len(handlers) > 0:
