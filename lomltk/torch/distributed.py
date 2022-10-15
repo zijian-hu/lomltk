@@ -79,10 +79,6 @@ def get_rank(group: GroupType = None) -> int:
     return distributed.get_rank(group)
 
 
-def get_reduce_operation():
-    pass
-
-
 def all_reduce(
         tensor: Tensor,
         op: ReduceOp | Literal["mean", "average", "sum"] = ReduceOp.SUM,
