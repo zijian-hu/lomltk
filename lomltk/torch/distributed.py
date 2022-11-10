@@ -71,7 +71,7 @@ def get_world_size(group: GroupType = None) -> int:
 
 @safe_distributed(default=0)
 def get_local_rank() -> int:
-    return os.environ.get("LOCAL_RANK", 0)
+    return int(os.environ.get("LOCAL_RANK", 0))
 
 
 @safe_distributed(default=0)
