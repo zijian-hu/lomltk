@@ -1,6 +1,13 @@
 from __future__ import annotations
 import math
-from typing import Any, Callable, Optional
+from typing import (
+    Any,
+    Callable,
+    Optional,
+    TypeVar,
+)
+
+T = TypeVar("T")
 
 __all__ = [
     "get_file_type_str",
@@ -20,8 +27,8 @@ def int_or_inf(input_str: str) -> int | float:
     return result
 
 
-def get_optional_type(func: Callable[[str], Any]) -> Callable[[str], Optional[Any]]:
-    def wrapper(input_str: str) -> Optional[Any]:
+def get_optional_type(func: Callable[[str], T]) -> Callable[[str], Optional[T]]:
+    def wrapper(input_str: str) -> Optional[T]:
         if input_str.lower().strip() in {"none", "null"}:
             return None
         else:
