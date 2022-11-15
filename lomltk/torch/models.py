@@ -1,20 +1,57 @@
 from __future__ import annotations
 from contextlib import ContextDecorator, contextmanager
-from typing import Any, Dict, ContextManager
+from typing import (
+    Any,
+    ContextManager,
+    TypeVar,
+    Union,
+)
 
-from torch.nn import Module
+import torch
+from torch import Tensor
+from torch.nn import Module, SyncBatchNorm
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
+from .distributed import is_distributed, get_local_rank
+
+# see https://stackoverflow.com/a/61737894
+D = TypeVar("D", bound=dict)
+M = TypeVar("M", bound=Module)
+ModuleType = Union[M, DistributedDataParallel]
+
 __all__ = [
+    # functions
+    "auto_model",
     "consume_prefix_in_state_dict_if_present",
     "get_module_size",
     "set_model_mode",
+    "to_device",
     "unwrap_ddp",
+
+    # type
+    "ModuleType",
 ]
 
 
+def auto_model(model: ModuleType, device: torch.device) -> ModuleType:
+    if is_distributed() and not isinstance(model, DistributedDataParallel):
+        local_rank = get_local_rank()
+
+        model = SyncBatchNorm.convert_sync_batchnorm(model)
+        model = DistributedDataParallel(
+            model.to(device),
+            device_ids=[local_rank],
+            output_device=[local_rank],
+            find_unused_parameters=True
+        )
+    else:
+        model.to(device)
+
+    return model
+
+
 @contextmanager
-def set_model_mode(model: Module, mode: bool) -> ContextManager[None] | ContextDecorator:
+def set_model_mode(model: M, mode: bool) -> ContextManager[None] | ContextDecorator:
     """
 
     Args:
@@ -34,7 +71,7 @@ def set_model_mode(model: Module, mode: bool) -> ContextManager[None] | ContextD
 
 
 def consume_prefix_in_state_dict_if_present(
-        state_dict: Dict[str, Any],
+        state_dict: dict[str, Any],
         prefix: str
 ) -> None:
     r"""Copied from https://github.com/pytorch/pytorch/blob/57f039b41f940af4f02718fdf967cca1f713d759/torch/nn/modules/utils.py#L43
@@ -69,11 +106,32 @@ def consume_prefix_in_state_dict_if_present(
             metadata[newkey] = metadata.pop(key)
 
 
-def get_module_size(module: Module) -> int:
+def get_module_size(module: M) -> int:
     return sum(p.numel() for p in module.parameters())
 
 
-def unwrap_ddp(module: Module) -> Module:
+def to_device(
+        data: list | tuple | D | Tensor | Module,
+        device: torch.device | str,
+        non_blocking: bool = True
+) -> list | tuple | D | Tensor | Module:
+    if isinstance(data, list):
+        data = [to_device(e, device) for e in data]
+
+    elif isinstance(data, tuple):
+        data = tuple(to_device(e, device) for e in data)
+
+    elif isinstance(data, dict):
+        for k in data.keys():
+            data[k] = to_device(data[k], device)
+
+    elif isinstance(data, (Tensor, Module)):
+        data = data.to(device, non_blocking=non_blocking)
+
+    return data
+
+
+def unwrap_ddp(module: ModuleType) -> M:
     if isinstance(module, (DataParallel, DistributedDataParallel)):
         return module.module
     else:
