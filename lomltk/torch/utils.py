@@ -1,5 +1,11 @@
 from __future__ import annotations
-from typing import Optional, Sequence, Union
+from contextlib import ContextDecorator, contextmanager
+from typing import (
+    ContextManager,
+    Optional,
+    Sequence,
+    Union,
+)
 
 import numpy as np
 import torch
@@ -10,6 +16,7 @@ TensorInputType = Union[Sequence[Union[int, float]], np.ndarray, Tensor]
 __all__ = [
     "random_choice",
     "to_tensor",
+    "toggle_grad",
 ]
 
 
@@ -67,3 +74,12 @@ def random_choice(
     outputs: Tensor = torch.index_select(choices, 0, indices)
 
     return outputs.reshape(size).contiguous()
+
+
+@contextmanager
+def toggle_grad(is_track_grad: bool) -> ContextManager[None] | ContextDecorator:
+    if not is_track_grad:
+        with torch.no_grad():
+            yield
+    else:
+        yield
