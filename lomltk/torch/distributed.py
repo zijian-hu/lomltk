@@ -40,7 +40,7 @@ def safe_distributed(default: DT = None) -> Callable[P, T | DT]:
     Decorator that returns default value when not in distributed mode
 
     Args:
-        default: default value
+        default: default value.
 
     Returns:
 
@@ -93,21 +93,22 @@ def all_reduce(
     return outputs
 
 
-def one_rank_only(rank: int = 0, synchronize: bool = False) -> Callable[P, Optional[T]]:
+def one_rank_only(rank: int = 0, synchronize: bool = False, default: DT = None) -> Callable[P, T | DT]:
     """
 
     Args:
         rank: target rank to execute the function.
         synchronize: if True, will synchronize with a barrier.
+        default: default value.
 
     Returns:
 
     """
 
-    def _one_rank_only(func: Callable[P, T]) -> Callable[P, Optional[T]]:
+    def _one_rank_only(func: Callable[P, T]) -> Callable[P, T | DT]:
         @wraps(func)
-        def wrapped_func(*args: P.args, **kwargs: P.kwargs) -> Optional[T]:
-            output = None
+        def wrapped_func(*args: P.args, **kwargs: P.kwargs) -> T | DT:
+            output = default
             try:
                 if get_rank() == rank:
                     output = func(*args, **kwargs)
