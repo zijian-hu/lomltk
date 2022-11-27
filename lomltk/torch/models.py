@@ -24,6 +24,7 @@ __all__ = [
     "auto_model",
     "consume_prefix_in_state_dict_if_present",
     "get_module_size",
+    "is_require_grad",
     "set_model_mode",
     "to_device",
     "unwrap_ddp",
@@ -35,7 +36,11 @@ __all__ = [
 
 
 def auto_model(model: DDPModuleType, device: torch.device) -> DDPModuleType:
-    if is_distributed() and not isinstance(model, DistributedDataParallel):
+    if (
+            is_distributed()
+            and not isinstance(model, DistributedDataParallel)
+            and is_require_grad(model)
+    ):
         local_rank = get_local_rank()
 
         model = SyncBatchNorm.convert_sync_batchnorm(model)
@@ -137,3 +142,12 @@ def unwrap_ddp(module: DDPModuleType) -> ModuleType:
         return module.module
     else:
         return module
+
+
+def is_require_grad(inputs: ModuleType | Tensor) -> bool:
+    if isinstance(inputs, Tensor):
+        return inputs.requires_grad
+    elif isinstance(inputs, Module):
+        return any(p.requires_grad for p in inputs.parameters())
+    else:
+        raise TypeError(f"Expecting torch.nn.Module and torch.Tensor but got \"{type(inputs)}\".")
