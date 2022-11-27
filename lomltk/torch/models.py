@@ -16,8 +16,8 @@ from .distributed import is_distributed, get_local_rank
 
 # see https://stackoverflow.com/a/61737894
 D = TypeVar("D", bound=dict)
-M = TypeVar("M", bound=Module)
-ModuleType = Union[M, DistributedDataParallel]
+ModuleType = TypeVar("ModuleType", bound=Module)
+DDPModuleType = Union[ModuleType, DistributedDataParallel]
 
 __all__ = [
     # functions
@@ -29,11 +29,12 @@ __all__ = [
     "unwrap_ddp",
 
     # type
+    "DDPModuleType",
     "ModuleType",
 ]
 
 
-def auto_model(model: ModuleType, device: torch.device) -> ModuleType:
+def auto_model(model: DDPModuleType, device: torch.device) -> DDPModuleType:
     if is_distributed() and not isinstance(model, DistributedDataParallel):
         local_rank = get_local_rank()
 
@@ -51,7 +52,7 @@ def auto_model(model: ModuleType, device: torch.device) -> ModuleType:
 
 
 @contextmanager
-def set_model_mode(model: M, mode: bool) -> ContextManager[None] | ContextDecorator:
+def set_model_mode(model: ModuleType, mode: bool) -> ContextManager[None] | ContextDecorator:
     """
 
     Args:
@@ -106,7 +107,7 @@ def consume_prefix_in_state_dict_if_present(
             metadata[newkey] = metadata.pop(key)
 
 
-def get_module_size(module: M) -> int:
+def get_module_size(module: ModuleType) -> int:
     return sum(p.numel() for p in module.parameters())
 
 
@@ -131,7 +132,7 @@ def to_device(
     return data
 
 
-def unwrap_ddp(module: ModuleType) -> M:
+def unwrap_ddp(module: DDPModuleType) -> ModuleType:
     if isinstance(module, (DataParallel, DistributedDataParallel)):
         return module.module
     else:
