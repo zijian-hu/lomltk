@@ -93,11 +93,17 @@ def all_reduce(
     return outputs
 
 
-def one_rank_only(rank: int = 0, synchronize: bool = False, default: DT = None) -> Callable[P, T | DT]:
+def one_rank_only(
+        rank: Optional[int] = None,
+        local_rank: Optional[int] = None,
+        synchronize: bool = False,
+        default: DT = None
+) -> Callable[P, T | DT]:
     """
 
     Args:
         rank: target rank to execute the function.
+        local_rank: target local rank to execute the function.
         synchronize: if True, will synchronize with a barrier.
         default: default value.
 
@@ -110,7 +116,7 @@ def one_rank_only(rank: int = 0, synchronize: bool = False, default: DT = None) 
         def wrapped_func(*args: P.args, **kwargs: P.kwargs) -> T | DT:
             output = default
             try:
-                if get_rank() == rank:
+                if (rank is None or get_rank() == rank) and (local_rank is None or get_local_rank() == local_rank):
                     output = func(*args, **kwargs)
             finally:
                 if synchronize:
