@@ -14,6 +14,7 @@ __all__ = [
     # functions
     "get_random_state",
     "set_random_state",
+    "set_seed",
 ]
 
 
@@ -26,6 +27,12 @@ def get_random_state() -> RandomState:
 
 
 def set_random_state(random_state: RandomState) -> None:
-    torch.random.set_rng_state(random_state["torch"].cpu())
-    np.random.set_state(random_state["numpy"])
     random.setstate(random_state["python"])
+    np.random.set_state(random_state["numpy"])
+    torch.random.set_rng_state(random_state["torch"].cpu())
+
+
+def set_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
