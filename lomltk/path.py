@@ -35,7 +35,10 @@ def find_all_files_helper(
         is_valid_func: Callable[[str | Path], bool] = is_file,
         pattern: str = "*",
         is_recursive: bool = True,
-        num_workers: int = 1
+        num_workers: int = 1,
+        search_desc: str = "Finding files",
+        verify_desc: str = "Verifying files",
+        show_progress_bar: bool = True
 ) -> dict[Path, bool]:
     input_dir = Path(input_dir)
     num_workers = resolve_num_workers(num_workers)
@@ -43,12 +46,13 @@ def find_all_files_helper(
     file_paths: list[Path] = [
         p for p in get_progress_bar(
             input_dir.rglob(pattern) if is_recursive else input_dir.glob(pattern),
-            desc=f"Finding files w/ pattern \"{pattern}\""
+            desc=search_desc,
+            is_tqdm=show_progress_bar
         ) if is_file(p)
     ]
 
     with tqdm_joblib_context(
-            get_progress_bar(file_paths, desc="Verifying files")
+            get_progress_bar(file_paths, desc=verify_desc, is_tqdm=show_progress_bar)
     ) as progress_bar:
         is_valid_list = Parallel(n_jobs=num_workers)(
             delayed(is_valid_func)(file_path)
@@ -65,14 +69,20 @@ def find_all_files(
         is_valid_func: Callable[[str | Path], bool] = is_file,
         pattern: str = "*",
         is_recursive: bool = True,
-        num_workers: int = 1
+        num_workers: int = 1,
+        search_desc: str = "Finding files",
+        verify_desc: str = "Verifying files",
+        show_progress_bar: bool = True
 ) -> list[Path]:
     file_path_validity_dict = helper_func(
         input_dir=input_dir,
         is_valid_func=is_valid_func,
         pattern=pattern,
         is_recursive=is_recursive,
-        num_workers=num_workers
+        num_workers=num_workers,
+        search_desc=search_desc,
+        verify_desc=verify_desc,
+        show_progress_bar=show_progress_bar
     )
 
     return [k for k, v in file_path_validity_dict.items() if v]
