@@ -1,11 +1,13 @@
 from __future__ import annotations
 from contextlib import ContextDecorator, contextmanager
 import os
-from typing import ContextManager
+from typing import ContextManager, Iterable, TypeVar
 
 import joblib
 from joblib import Parallel
 from tqdm import tqdm
+
+T = TypeVar("T")
 
 __all__ = [
     "cpu_count",
@@ -44,7 +46,7 @@ def resolve_num_workers(num_workers: int = -1) -> int:
 
 
 @contextmanager
-def tqdm_joblib_context(tqdm_object: tqdm) -> ContextManager[tqdm] | ContextDecorator:
+def tqdm_joblib_context(tqdm_object: tqdm | Iterable[T]) -> ContextManager[tqdm | Iterable[T]] | ContextDecorator:
     """
     Context manager to patch joblib to report into tqdm progress bar given as argument.
     See https://stackoverflow.com/a/61689175 and https://stackoverflow.com/a/58936697 for detail
@@ -55,17 +57,19 @@ def tqdm_joblib_context(tqdm_object: tqdm) -> ContextManager[tqdm] | ContextDeco
     Returns:
 
     """
+    if isinstance(tqdm_object, tqdm):
+        def tqdm_print_progress(self: Parallel) -> None:
+            if self.n_completed_tasks > tqdm_object.n:
+                n_completed = self.n_completed_tasks - tqdm_object.n
+                tqdm_object.update(n=n_completed)
 
-    def tqdm_print_progress(self: Parallel) -> None:
-        if self.n_completed_tasks > tqdm_object.n:
-            n_completed = self.n_completed_tasks - tqdm_object.n
-            tqdm_object.update(n=n_completed)
+        old_print_progress = joblib.parallel.Parallel.print_progress
+        joblib.parallel.Parallel.print_progress = tqdm_print_progress
 
-    old_print_progress = joblib.parallel.Parallel.print_progress
-    joblib.parallel.Parallel.print_progress = tqdm_print_progress
-
-    try:
+        try:
+            yield tqdm_object
+        finally:
+            joblib.parallel.Parallel.print_progress = old_print_progress
+            tqdm_object.close()
+    else:
         yield tqdm_object
-    finally:
-        joblib.parallel.Parallel.print_progress = old_print_progress
-        tqdm_object.close()
