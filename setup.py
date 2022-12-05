@@ -20,14 +20,14 @@ if sys.version_info < MIN_PYTHON_VERSION:
 
 
 def read(*paths, **kwargs):
-    kwargs.setdefault("encoding", "utf8")
+    kwargs.setdefault("encoding", "utf-8")
 
     with Path(*paths).open(**kwargs) as f:
         return f.read()
 
 
 def read_requirements(*paths, **kwargs):
-    kwargs.setdefault("encoding", "utf8")
+    kwargs.setdefault("encoding", "utf-8")
 
     with Path(*paths).open(**kwargs) as f:
         return [str(req) for req in parse_requirements(f)]
