@@ -5,4 +5,4 @@ from . import algorithm
 from . import pandas
 from . import torch
 
-__version__ = "0.0.1.post1"
+__version__ = "0.0.1.post2.dev1"
