@@ -1,7 +1,4 @@
 from __future__ import annotations
-import itertools
-import time
-from functools import wraps
 from typing import (
     Any,
     Callable,
@@ -11,6 +8,10 @@ from typing import (
     TypeVar,
 )
 from typing_extensions import ParamSpec
+
+import itertools
+import time
+from functools import wraps
 
 from tqdm import tqdm
 

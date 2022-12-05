@@ -1,4 +1,7 @@
 from __future__ import annotations
+from typing import Optional, TextIO
+from typing_extensions import Literal
+
 import logging
 from logging import (
     FileHandler,
@@ -8,8 +11,6 @@ from logging import (
     StreamHandler,
 )
 from pathlib import Path
-from typing import Optional, TextIO
-from typing_extensions import Literal
 
 __all__ = [
     "get_logger",

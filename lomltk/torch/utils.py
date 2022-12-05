@@ -1,11 +1,12 @@
 from __future__ import annotations
-from contextlib import ContextDecorator, contextmanager
 from typing import (
     ContextManager,
     Optional,
     Sequence,
     Union,
 )
+
+from contextlib import ContextDecorator, contextmanager
 
 import numpy as np
 import torch

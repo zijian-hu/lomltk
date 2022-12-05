@@ -1,6 +1,4 @@
 from __future__ import annotations
-from functools import wraps
-import os
 from typing import (
     Any,
     Callable,
@@ -8,6 +6,9 @@ from typing import (
     TypeVar,
 )
 from typing_extensions import Literal, ParamSpec
+
+from functools import wraps
+import os
 
 from torch import distributed, Tensor
 from torch.distributed import ProcessGroup, ReduceOp

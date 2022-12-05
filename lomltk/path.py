@@ -1,7 +1,8 @@
 from __future__ import annotations
+from typing import Callable
+
 import os
 from pathlib import Path
-from typing import Callable
 
 from joblib import delayed, Parallel
 

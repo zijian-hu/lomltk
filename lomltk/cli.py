@@ -1,11 +1,7 @@
 from __future__ import annotations
+from typing import Callable, Optional, TypeVar
+
 import math
-from typing import (
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-)
 
 T = TypeVar("T")
 

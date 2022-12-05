@@ -1,11 +1,12 @@
 from __future__ import annotations
-from contextlib import ContextDecorator, contextmanager
 from typing import (
     Any,
     ContextManager,
     TypeVar,
     Union,
 )
+
+from contextlib import ContextDecorator, contextmanager
 
 import torch
 from torch import Tensor

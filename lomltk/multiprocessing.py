@@ -1,7 +1,8 @@
 from __future__ import annotations
+from typing import ContextManager, Iterable, TypeVar
+
 from contextlib import ContextDecorator, contextmanager
 import os
-from typing import ContextManager, Iterable, TypeVar
 
 import joblib
 from joblib import Parallel

@@ -1,11 +1,12 @@
 from __future__ import annotations
-from pathlib import Path
 from typing import (
     Any,
     Optional,
     Sequence,
     Union,
 )
+
+from pathlib import Path
 
 import cv2 as cv
 import numpy as np

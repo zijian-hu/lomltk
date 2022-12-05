@@ -1,5 +1,6 @@
-import re
 from typing import Mapping
+
+import re
 
 __all__ = [
     "replace",

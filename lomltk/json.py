@@ -1,13 +1,14 @@
 from __future__ import annotations
-import json
-from json import JSONDecodeError, JSONEncoder
-from pathlib import Path
 from typing import (
     Any,
     AnyStr,
     IO,
     Optional,
 )
+
+import json
+from json import JSONDecodeError, JSONEncoder
+from pathlib import Path
 
 from .path import is_file
 
