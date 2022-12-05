@@ -11,10 +11,12 @@ from contextlib import ContextDecorator, contextmanager
 import numpy as np
 import torch
 from torch import Size, Tensor
+from torch.nn import functional as F
 
 TensorInputType = Union[Sequence[Union[int, float]], np.ndarray, Tensor]
 
 __all__ = [
+    "multi_hot",
     "random_choice",
     "to_tensor",
     "toggle_grad",
@@ -84,3 +86,35 @@ def toggle_grad(is_track_grad: bool) -> ContextManager[None] | ContextDecorator:
             yield
     else:
         yield
+
+
+def multi_hot(
+        inputs: Tensor | Sequence[Tensor],
+        num_classes: int = -1
+) -> Tensor:
+    if isinstance(inputs, Sequence):
+        if len(inputs) == 0:
+            raise RuntimeError(f"Only non-empty list is accepted.")
+
+        if any(not isinstance(t, Tensor) for t in inputs):
+            raise TypeError(f"Only list of torch.Tensor is supported.")
+
+        if any(t.shape[:-1] != inputs[0].shape[:-1] for t in inputs):
+            raise RuntimeError(
+                f"All tensors must have the same shape except for the last dimension."
+            )
+
+        return torch.stack([
+            multi_hot(t, num_classes=num_classes) for t in inputs
+        ])
+
+    elif isinstance(inputs, Tensor):
+        outputs = F.one_hot(inputs, num_classes)
+
+        if len(inputs.shape) >= 1:
+            outputs = outputs.sum(dim=max(0, len(inputs.shape) + 1 - 2)).clamp(max=1)
+
+        return outputs
+
+    else:
+        raise TypeError(f"Expecting torch.Tensor or list[torch.Tensor], but got {type(inputs)}")
