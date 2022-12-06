@@ -14,6 +14,8 @@ import torch
 from torch import Size, Tensor
 from torch.nn import functional as F, Module
 
+from .typing import ModuleType
+
 D = TypeVar("D", bound=dict)
 TensorInputType = Union[Sequence[Union[int, float]], np.ndarray, Tensor]
 
@@ -27,10 +29,10 @@ __all__ = [
 
 
 def to_device(
-        data: list | tuple | D | Tensor | Module,
+        data: list | tuple | D | Tensor | ModuleType,
         device: torch.device | str,
         non_blocking: bool = True
-) -> list | tuple | D | Tensor | Module:
+) -> list | tuple | D | Tensor | ModuleType:
     if isinstance(data, list):
         data = [to_device(d, device) for d in data]
 

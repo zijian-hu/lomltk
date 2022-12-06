@@ -1,10 +1,5 @@
 from __future__ import annotations
-from typing import (
-    Any,
-    ContextManager,
-    TypeVar,
-    Union,
-)
+from typing import Any, ContextManager
 
 from contextlib import ContextDecorator, contextmanager
 
@@ -14,10 +9,7 @@ from torch.nn import Module, SyncBatchNorm
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
 from .distributed import is_distributed, get_local_rank
-
-# see https://stackoverflow.com/a/61737894
-ModuleType = TypeVar("ModuleType", bound=Module)
-DDPModuleType = Union[ModuleType, DistributedDataParallel]
+from .typing import DDPModuleType, ModuleType
 
 __all__ = [
     # functions
@@ -27,10 +19,6 @@ __all__ = [
     "is_require_grad",
     "set_model_mode",
     "unwrap_ddp",
-
-    # type
-    "DDPModuleType",
-    "ModuleType",
 ]
 
 
