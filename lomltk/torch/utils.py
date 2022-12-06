@@ -3,6 +3,7 @@ from typing import (
     ContextManager,
     Optional,
     Sequence,
+    TypeVar,
     Union,
 )
 
@@ -11,16 +12,39 @@ from contextlib import ContextDecorator, contextmanager
 import numpy as np
 import torch
 from torch import Size, Tensor
-from torch.nn import functional as F
+from torch.nn import functional as F, Module
 
+D = TypeVar("D", bound=dict)
 TensorInputType = Union[Sequence[Union[int, float]], np.ndarray, Tensor]
 
 __all__ = [
     "multi_hot",
     "random_choice",
+    "to_device",
     "to_tensor",
     "toggle_grad",
 ]
+
+
+def to_device(
+        data: list | tuple | D | Tensor | Module,
+        device: torch.device | str,
+        non_blocking: bool = True
+) -> list | tuple | D | Tensor | Module:
+    if isinstance(data, list):
+        data = [to_device(d, device) for d in data]
+
+    elif isinstance(data, tuple):
+        data = tuple(to_device(d, device) for d in data)
+
+    elif isinstance(data, dict):
+        for k in data.keys():
+            data[k] = to_device(data[k], device)
+
+    elif isinstance(data, (Tensor, Module)):
+        data = data.to(device, non_blocking=non_blocking)
+
+    return data
 
 
 def to_tensor(inputs: int | float | TensorInputType) -> Tensor:

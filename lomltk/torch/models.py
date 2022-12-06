@@ -16,7 +16,6 @@ from torch.nn.parallel import DataParallel, DistributedDataParallel
 from .distributed import is_distributed, get_local_rank
 
 # see https://stackoverflow.com/a/61737894
-D = TypeVar("D", bound=dict)
 ModuleType = TypeVar("ModuleType", bound=Module)
 DDPModuleType = Union[ModuleType, DistributedDataParallel]
 
@@ -27,7 +26,6 @@ __all__ = [
     "get_module_size",
     "is_require_grad",
     "set_model_mode",
-    "to_device",
     "unwrap_ddp",
 
     # type
@@ -115,27 +113,6 @@ def consume_prefix_in_state_dict_if_present(
 
 def get_module_size(module: ModuleType) -> int:
     return sum(p.numel() for p in module.parameters())
-
-
-def to_device(
-        data: list | tuple | D | Tensor | Module,
-        device: torch.device | str,
-        non_blocking: bool = True
-) -> list | tuple | D | Tensor | Module:
-    if isinstance(data, list):
-        data = [to_device(e, device) for e in data]
-
-    elif isinstance(data, tuple):
-        data = tuple(to_device(e, device) for e in data)
-
-    elif isinstance(data, dict):
-        for k in data.keys():
-            data[k] = to_device(data[k], device)
-
-    elif isinstance(data, (Tensor, Module)):
-        data = data.to(device, non_blocking=non_blocking)
-
-    return data
 
 
 def unwrap_ddp(module: DDPModuleType) -> ModuleType:
